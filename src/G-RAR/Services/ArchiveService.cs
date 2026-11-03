@@ -23,21 +23,32 @@ public static class ArchiveService
 
     public static ArchiveListing ReadListing(string path, string? password)
     {
-        using var archive = OpenArchive(path, password);
-        var entries = ToEntries(archive, out var totalSize, out var totalPacked, out var encrypted);
-
-        return new ArchiveListing
+        try
         {
-            Path = path,
-            Format = FormatLabel(path, archive.Type),
-            FileSize = new FileInfo(path).Length,
-            IsSolid = archive.IsSolid,
-            IsComplete = archive.IsComplete,
-            HasEncryptedEntries = encrypted,
-            TotalSize = totalSize,
-            TotalPacked = totalPacked,
-            Entries = entries,
-        };
+            using var archive = OpenArchive(path, password);
+            var entries = ToEntries(archive, out var totalSize, out var totalPacked, out var encrypted);
+
+            return new ArchiveListing
+            {
+                Path = path,
+                Format = FormatLabel(path, archive.Type),
+                FileSize = new FileInfo(path).Length,
+                IsSolid = archive.IsSolid,
+                IsComplete = archive.IsComplete,
+                HasEncryptedEntries = encrypted,
+                TotalSize = totalSize,
+                TotalPacked = totalPacked,
+                Entries = entries,
+            };
+        }
+        catch (ArchivePasswordRequiredException)
+        {
+            throw;
+        }
+        catch (Exception ex) when (LooksLikePasswordError(ex))
+        {
+            throw PasswordOrDamage(password, ex);
+        }
     }
 
     private static IReadOnlyList<ArchiveEntryInfo> ToEntries(
@@ -53,7 +64,7 @@ public static class ArchiveService
 
         foreach (var entry in archive.Entries)
         {
-            var key = PathUtil.NormalizeKey(entry.Key);
+            var key = PathUtil.NormalizeKey(entry.Key ?? string.Empty);
             if (key.Length == 0)
                 continue;
 
@@ -134,7 +145,7 @@ public static class ArchiveService
         {
             ct.ThrowIfCancellationRequested();
 
-            var key = PathUtil.NormalizeKey(entry.Key);
+            var key = PathUtil.NormalizeKey(entry.Key ?? string.Empty);
             if (key.Length == 0 || (selected is not null && !selected.Contains(key)))
                 continue;
 
@@ -158,7 +169,7 @@ public static class ArchiveService
         var files = plan.Where(p => !p.Entry.IsDirectory).ToList();
         var reporter = new ProgressReporter(progress, "Extracting", plan.Count, files.Sum(p => p.Entry.Size));
 
-        foreach (var (entry, target, _) in plan)
+        foreach (var (entry, target, display) in plan)
         {
             ct.ThrowIfCancellationRequested();
 
@@ -179,7 +190,7 @@ public static class ArchiveService
             if (!string.IsNullOrEmpty(directory))
                 Directory.CreateDirectory(directory);
 
-            reporter.OnFile(entry.Key);
+            reporter.OnFile(entry.Key ?? display);
 
             try
             {
@@ -195,7 +206,7 @@ public static class ArchiveService
                     reporter.OnBytes(read);
                 }
             }
-            catch (CryptographicException ex)
+            catch (Exception ex) when (LooksLikePasswordError(ex))
             {
                 TryDelete(target);
                 throw PasswordOrDamage(options.Password, ex);
@@ -249,7 +260,7 @@ public static class ArchiveService
         foreach (var entry in entries)
         {
             ct.ThrowIfCancellationRequested();
-            reporter.OnFile(entry.Key);
+            reporter.OnFile(entry.Key ?? PathUtil.NormalizeKey(entry.Key ?? string.Empty));
 
             long read = 0;
             try
@@ -263,7 +274,7 @@ public static class ArchiveService
                     reporter.OnBytes(count);
                 }
             }
-            catch (CryptographicException ex)
+            catch (Exception ex) when (LooksLikePasswordError(ex))
             {
                 throw PasswordOrDamage(password, ex);
             }
@@ -307,7 +318,7 @@ public static class ArchiveService
             using var destination = File.Create(target);
             source.CopyTo(destination, 81920);
         }
-        catch (CryptographicException ex)
+        catch (Exception ex) when (LooksLikePasswordError(ex))
         {
             TryDelete(target);
             throw PasswordOrDamage(password, ex);
@@ -594,7 +605,7 @@ public static class ArchiveService
                 {
                     ct.ThrowIfCancellationRequested();
 
-                    var key = PathUtil.NormalizeKey(entry.Key);
+                    var key = PathUtil.NormalizeKey(entry.Key ?? string.Empty);
                     if (key.Length == 0)
                         continue;
 
@@ -738,7 +749,7 @@ public static class ArchiveService
                 {
                     ct.ThrowIfCancellationRequested();
 
-                    var key = PathUtil.NormalizeKey(entry.Key);
+                    var key = PathUtil.NormalizeKey(entry.Key ?? string.Empty);
                     if (key.Length == 0 || removeKeys.Contains(key))
                         continue;
 
@@ -883,9 +894,13 @@ public static class ArchiveService
 
             return ArchiveFactory.Open(path, options);
         }
-        catch (CryptographicException ex)
+        catch (ArchivePasswordRequiredException)
         {
-            throw new ArchivePasswordRequiredException("This archive is password protected.", ex);
+            throw;
+        }
+        catch (Exception ex) when (LooksLikePasswordError(ex))
+        {
+            throw PasswordOrDamage(password, ex);
         }
         catch (Exception ex) when (ex is InvalidFormatException or SharpCompressException or NotSupportedException)
         {
@@ -922,7 +937,7 @@ public static class ArchiveService
         {
             return entry.OpenEntryStream();
         }
-        catch (CryptographicException ex)
+        catch (Exception ex) when (LooksLikePasswordError(ex))
         {
             throw new ArchivePasswordRequiredException("A password is required to read this entry.", ex);
         }
@@ -932,6 +947,34 @@ public static class ArchiveService
         => string.IsNullOrEmpty(password)
             ? new ArchivePasswordRequiredException("A password is required to read this archive.", inner)
             : new ArchiveCorruptedException("The password is incorrect or the archive is damaged.", inner);
+
+    private static bool LooksLikePasswordError(Exception ex)
+    {
+        for (var current = ex; current is not null; current = current.InnerException)
+        {
+            if (current is CryptographicException or System.Security.Cryptography.CryptographicException)
+                return true;
+
+            var message = current.Message;
+            if (string.IsNullOrEmpty(message))
+                continue;
+
+            if (message.Contains("password", StringComparison.OrdinalIgnoreCase)
+                || message.Contains("decrypt", StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
+
+        return false;
+    }
+
+    private static string FormatLabel(string path, ArchiveType type)
+    {
+        var ext = Path.GetExtension(path).ToLowerInvariant();
+        if (ext is ".gz" or ".tgz" || path.EndsWith(".tar.gz", StringComparison.OrdinalIgnoreCase))
+            return type == ArchiveType.Tar ? "TAR.GZ" : FormatName(type);
+
+        return FormatName(type);
+    }
 
     private static void TryDelete(string path)
     {

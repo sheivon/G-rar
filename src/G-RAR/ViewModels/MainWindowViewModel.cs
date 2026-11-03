@@ -359,47 +359,64 @@ public sealed class MainWindowViewModel : ObservableObject
             return;
         }
 
-        if (FileTypes.IsArchiveExtension(item.Extension))
+        if (FileTypes.IsArchiveExtension(item.Extension) && !item.FromArchive)
         {
-            if (!item.FromArchive)
-            {
-                await OpenArchiveAsync(item.FullPath);
-                return;
-            }
+            await OpenArchiveAsync(item.FullPath);
+            return;
         }
 
-        // Regular file (or an archive seen from inside another archive): unpack it first.
-        var password = item.FromArchive ? _passwords.GetValueOrDefault(_archivePath) : null;
-        string path;
-        try
+        if (!item.FromArchive)
         {
-            StatusText = $"Extracting \"{item.Name}\" …";
-            path = await Task.Run(() => ArchiveService.ExtractToTemp(_archivePath, item.EntryKey!, password));
+            FileSystemService.OpenWithDefaultApplication(item.FullPath);
+            return;
         }
-        catch (ArchivePasswordRequiredException)
+
+        var password = _passwords.GetValueOrDefault(_archivePath);
+        if (item.IsEncrypted && string.IsNullOrEmpty(password))
         {
-            var prompted = await PromptPasswordAsync($"\"{Path.GetFileName(_archivePath)}\" is password protected.");
-            if (prompted is null)
+            password = await PromptPasswordAsync($"\"{item.Name}\" is password protected. Enter the password to open it.");
+            if (password is null)
             {
                 StatusText = "Ready";
                 return;
             }
 
-            _passwords[_archivePath] = prompted;
+            _passwords[_archivePath] = password;
+        }
+
+        string path;
+        for (var attempt = 0; ; attempt++)
+        {
             try
             {
-                path = await Task.Run(() => ArchiveService.ExtractToTemp(_archivePath, item.EntryKey!, prompted));
+                StatusText = $"Extracting \"{item.Name}\" …";
+                path = await Task.Run(() => ArchiveService.ExtractToTemp(_archivePath, item.EntryKey!, password));
+                break;
+            }
+            catch (ArchivePasswordRequiredException)
+            {
+                if (attempt >= 2)
+                {
+                    await ShowMessageAsync("Open", "The password is incorrect or the file cannot be decrypted.", MessageIcon.Warning);
+                    StatusText = "Ready";
+                    return;
+                }
+
+                var prompted = await PromptPasswordAsync($"\"{item.Name}\" is password protected. Enter the password to open it.");
+                if (prompted is null)
+                {
+                    StatusText = "Ready";
+                    return;
+                }
+
+                password = prompted;
+                _passwords[_archivePath] = prompted;
             }
             catch (Exception ex)
             {
                 await ShowErrorAsync("Open", ex);
                 return;
             }
-        }
-        catch (Exception ex)
-        {
-            await ShowErrorAsync("Open", ex);
-            return;
         }
 
         try
@@ -644,9 +661,11 @@ public sealed class MainWindowViewModel : ObservableObject
                 StatusText = "Ready";
                 return true;
             }
-            catch (ArchivePasswordRequiredException ex)
+            catch (ArchivePasswordRequiredException)
             {
-                var prompted = await PromptPasswordAsync($"\"{Path.GetFileName(path)}\" is password protected.", ex.Message);
+                var prompted = await PromptPasswordAsync(
+                    $"\"{Path.GetFileName(path)}\" is password protected. Enter the password to open it.",
+                    attempt == 0 ? null : "The previous password was not accepted.");
                 if (prompted is null)
                 {
                     StatusText = "Ready";
@@ -1078,8 +1097,26 @@ public sealed class MainWindowViewModel : ObservableObject
         _settings.Settings.ExtractOpenFolder = viewModel.OpenDestination;
         _settings.Touch();
 
-        var options = viewModel.BuildOptions(viewModel.NeedsPassword ? viewModel.Password : null);
         var archivePath = _archivePath;
+        var password = viewModel.Password;
+        if (string.IsNullOrEmpty(password))
+            password = _passwords.GetValueOrDefault(archivePath);
+
+        if ((viewModel.NeedsPassword || _listing.HasEncryptedEntries) && string.IsNullOrEmpty(password))
+        {
+            var prompted = await PromptPasswordAsync(
+                $"\"{Path.GetFileName(archivePath)}\" is password protected. Enter the password to extract it.");
+            if (prompted is null)
+                return;
+
+            password = prompted;
+            _passwords[archivePath] = prompted;
+        }
+
+        if (!string.IsNullOrEmpty(password))
+            _passwords[archivePath] = password;
+
+        var options = viewModel.BuildOptions(string.IsNullOrEmpty(password) ? null : password);
 
         for (var attempt = 0; attempt < 3; attempt++)
         {
@@ -1092,7 +1129,8 @@ public sealed class MainWindowViewModel : ObservableObject
 
             if (outcome.PasswordRequired)
             {
-                var prompted = await PromptPasswordAsync($"\"{Path.GetFileName(archivePath)}\" is password protected.");
+                var prompted = await PromptPasswordAsync(
+                    $"\"{Path.GetFileName(archivePath)}\" is password protected. Enter the password to extract it.");
                 if (prompted is null)
                     return;
 
@@ -1300,7 +1338,8 @@ public sealed class MainWindowViewModel : ObservableObject
 
             if (outcome.PasswordRequired)
             {
-                var prompted = await PromptPasswordAsync($"\"{Path.GetFileName(path)}\" is password protected.");
+                var prompted = await PromptPasswordAsync(
+                    $"\"{Path.GetFileName(path)}\" is password protected. Enter the password to test it.");
                 if (prompted is null)
                     return;
 

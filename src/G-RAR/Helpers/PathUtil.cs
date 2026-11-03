@@ -8,7 +8,7 @@ public static class PathUtil
     public static readonly char[] InvalidFileNameChars = Path.GetInvalidFileNameChars();
 
     /// <summary>Normalises an archive entry key to '/' separated form without a leading slash.</summary>
-    public static string NormalizeKey(string key)
+    public static string NormalizeKey(string? key)
     {
         if (string.IsNullOrEmpty(key))
             return string.Empty;

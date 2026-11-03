@@ -1,5 +1,6 @@
 using System.IO.Compression;
 using GRAR.Helpers;
+using GRAR.Models;
 using SharpCompress.Archives;
 using SharpCompress.Common;
 using SharpCompress.Readers;
@@ -44,8 +45,8 @@ internal static class GZipContainer
             var (size, crc) = Inflate(path, temp);
 
             var payload = TryOpenArchive(temp, options);
-            if (payload is not null)
-                return new TempFileArchive(payload.Archive, payload.Stream, temp);
+            if (payload is { } opened)
+                return new TempFileArchive(opened.Archive, opened.Stream, temp);
 
             return new SingleFileArchive(temp, EntryNameFor(path), size, compressedSize, crc, modified);
         }
