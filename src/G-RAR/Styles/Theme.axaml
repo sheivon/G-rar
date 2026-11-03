@@ -1,0 +1,217 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- ================================= palette ================================= -->
+
+    <Styles.Resources>
+        <Color x:Key="Color.Chrome">#FFF2F4F7</Color>
+        <Color x:Key="Color.ChromeBorder">#FFD3D9E2</Color>
+        <Color x:Key="Color.Accent">#FF3C6FA8</Color>
+        <Color x:Key="Color.AccentSoft">#FFDCE7F5</Color>
+        <Color x:Key="Color.Text">#FF20262E</Color>
+        <Color x:Key="Color.TextMuted">#FF6B7684</Color>
+
+        <SolidColorBrush x:Key="Brush.Chrome" Color="{StaticResource Color.Chrome}" />
+        <SolidColorBrush x:Key="Brush.ChromeBorder" Color="{StaticResource Color.ChromeBorder}" />
+        <SolidColorBrush x:Key="Brush.Accent" Color="{StaticResource Color.Accent}" />
+        <SolidColorBrush x:Key="Brush.AccentSoft" Color="{StaticResource Color.AccentSoft}" />
+    </Styles.Resources>
+
+    <!-- ================================== chrome ================================= -->
+
+    <Style Selector="Window">
+        <Setter Property="Background" Value="{StaticResource Brush.Chrome}" />
+        <Setter Property="FontFamily" Value="Inter" />
+        <Setter Property="FontSize" Value="13" />
+    </Style>
+
+    <Style Selector="TextBlock">
+        <Setter Property="Foreground" Value="{StaticResource Color.Text}" />
+    </Style>
+
+    <!-- ================================= toolbar ================================= -->
+
+    <Style Selector="Border.toolbar">
+        <Setter Property="Background" Value="#FFFAFBFD" />
+        <Setter Property="BorderBrush" Value="{StaticResource Brush.ChromeBorder}" />
+        <Setter Property="BorderThickness" Value="0,0,0,1" />
+        <Setter Property="Padding" Value="4,3" />
+    </Style>
+
+    <Style Selector="Button.tool">
+        <Setter Property="MinWidth" Value="30" />
+        <Setter Property="Height" Value="30" />
+        <Setter Property="Padding" Value="5,4" />
+        <Setter Property="Margin" Value="1,0" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="Button.tool:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="#FFE7EDF6" />
+    </Style>
+
+    <Style Selector="Button.tool:pressed /template/ ContentPresenter">
+        <Setter Property="Background" Value="#FFD3E0F1" />
+    </Style>
+
+    <Style Selector="Button.tool:disabled">
+        <Setter Property="Opacity" Value="0.4" />
+    </Style>
+
+    <Style Selector="Separator.toolbar-sep">
+        <Setter Property="Background" Value="{StaticResource Brush.ChromeBorder}" />
+        <Setter Property="Width" Value="1" />
+        <Setter Property="Height" Value="22" />
+        <Setter Property="Margin" Value="5,0" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+    </Style>
+
+    <!-- ================================ address bar =============================== -->
+
+    <Style Selector="TextBox.address">
+        <Setter Property="Background" Value="#FFFFFFFF" />
+        <Setter Property="BorderBrush" Value="{StaticResource Brush.ChromeBorder}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="6,3" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="TextBox.address:focus">
+        <Setter Property="BorderBrush" Value="{StaticResource Brush.Accent}" />
+    </Style>
+
+    <!-- ================================== tree =================================== -->
+
+    <Style Selector="TreeView">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="0" />
+    </Style>
+
+    <Style Selector="TreeViewItem">
+        <Setter Property="MinHeight" Value="24" />
+        <Setter Property="Padding" Value="2" />
+        <Setter Property="Margin" Value="0" />
+    </Style>
+
+    <Style Selector="TreeViewItem:selected /template/ ContentPresenter">
+        <Setter Property="Background" Value="{StaticResource Brush.AccentSoft}" />
+        <Setter Property="Foreground" Value="#FF1B2A3D" />
+    </Style>
+
+    <!-- ================================== grid =================================== -->
+
+    <Style Selector="DataGrid">
+        <Setter Property="Background" Value="#FFFFFFFF" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="GridLinesVisibility" Value="Horizontal" />
+        <Setter Property="HorizontalGridLinesBrush" Value="#FFEDF0F4" />
+        <Setter Property="RowBackground" Value="#FFFFFFFF" />
+        <Setter Property="HeadersVisibility" Value="Column" />
+        <Setter Property="SelectionMode" Value="Extended" />
+        <Setter Property="CanUserSortColumns" Value="True" />
+        <Setter Property="CanUserResizeColumns" Value="True" />
+        <Setter Property="CanUserReorderColumns" Value="True" />
+    </Style>
+
+    <Style Selector="DataGridColumnHeader">
+        <Setter Property="Background" Value="#FFF4F6F9" />
+        <Setter Property="Foreground" Value="#FF3D4754" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Padding" Value="6,5" />
+        <Setter Property="BorderBrush" Value="{StaticResource Brush.ChromeBorder}" />
+        <Setter Property="BorderThickness" Value="0,0,1,1" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <Style Selector="DataGridRow">
+        <Setter Property="MinHeight" Value="24" />
+    </Style>
+
+    <Style Selector="DataGridCell">
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="DataGridCell:selected">
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
+
+    <!-- ================================= panels ================================== -->
+
+    <Style Selector="Border.panel">
+        <Setter Property="Background" Value="#FFFFFFFF" />
+        <Setter Property="BorderBrush" Value="{StaticResource Brush.ChromeBorder}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="3" />
+    </Style>
+
+    <Style Selector="Border.statusbar">
+        <Setter Property="Background" Value="#FFF4F6F9" />
+        <Setter Property="BorderBrush" Value="{StaticResource Brush.ChromeBorder}" />
+        <Setter Property="BorderThickness" Value="0,1,0,0" />
+        <Setter Property="Padding" Value="8,3" />
+    </Style>
+
+    <Style Selector="TextBlock.status">
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Foreground" Value="{StaticResource Color.TextMuted}" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="TextBlock.muted">
+        <Setter Property="Foreground" Value="{StaticResource Color.TextMuted}" />
+    </Style>
+
+    <Style Selector="TextBlock.section">
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{StaticResource Color.TextMuted}" />
+        <Setter Property="Margin" Value="0,8,0,4" />
+    </Style>
+
+    <!-- ================================= dialogs ================================= -->
+
+    <Style Selector="Window.dialog">
+        <Setter Property="Background" Value="#FFF7F9FC" />
+        <Setter Property="SizeToContent" Value="Height" />
+        <Setter Property="WindowStartupLocation" Value="CenterOwner" />
+        <Setter Property="CanResize" Value="False" />
+        <Setter Property="ShowInTaskbar" Value="False" />
+        <Setter Property="FontSize" Value="13" />
+    </Style>
+
+    <Style Selector="Button.primary">
+        <Setter Property="Background" Value="{StaticResource Brush.Accent}" />
+        <Setter Property="Foreground" Value="#FFFFFFFF" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Padding" Value="14,5" />
+        <Setter Property="MinWidth" Value="86" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="Button.primary:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="#FF35649A" />
+    </Style>
+
+    <Style Selector="Button">
+        <Setter Property="Padding" Value="12,5" />
+    </Style>
+
+    <Style Selector="ComboBox, TextBox, NumericUpDown">
+        <Setter Property="MinHeight" Value="26" />
+    </Style>
+
+    <Style Selector="CheckBox">
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="ProgressBar">
+        <Setter Property="Height" Value="16" />
+    </Style>
+
+</Styles>

@@ -1,0 +1,56 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:GRAR.ViewModels"
+        x:Class="GRAR.Views.OptionsDialog"
+        x:DataType="vm:OptionsViewModel"
+        Classes="dialog"
+        Title="Options"
+        Width="470"
+        SizeToContent="Height"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False"
+        KeyDown="OnKeyDown">
+
+    <StackPanel Spacing="10" Margin="18,16">
+
+        <TextBlock Classes="section" Text="FILE LIST" Margin="0,0,0,0" />
+        <CheckBox Content="Show hidden files and folders" IsChecked="{Binding ShowHiddenFiles}" />
+
+        <TextBlock Classes="section" Text="CONFIRMATIONS" />
+        <CheckBox Content="Ask before deleting files" IsChecked="{Binding ConfirmDelete}" />
+        <CheckBox Content="Ask before exiting the application" IsChecked="{Binding ConfirmExit}" />
+        <CheckBox Content="Restore the last folder on startup" IsChecked="{Binding RestoreLastFolder}" />
+
+        <TextBlock Classes="section" Text="DEFAULTS FOR NEW ARCHIVES" />
+        <StackPanel Orientation="Horizontal" Spacing="8">
+            <TextBlock Text="Format:" VerticalAlignment="Center" />
+            <ComboBox Width="110"
+                      ItemsSource="{Binding FormatNamesList}"
+                      SelectedIndex="{Binding FormatIndex}" />
+            <TextBlock Text="Compression:"
+                       VerticalAlignment="Center"
+                       Margin="16,0,0,0" />
+            <Slider Width="130"
+                    Minimum="0"
+                    Maximum="9"
+                    TickFrequency="1"
+                    IsSnapToTickEnabled="True"
+                    Value="{Binding CompressionLevel}" />
+            <TextBlock Text="{Binding CompressionText}" Classes="muted" VerticalAlignment="Center" />
+        </StackPanel>
+
+        <StackPanel Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Spacing="8"
+                    Margin="0,10,0,0">
+            <Button Content="OK"
+                    IsDefault="True"
+                    Classes="primary"
+                    Click="OnOk" />
+            <Button Content="Cancel"
+                    IsCancel="True"
+                    Click="OnCancel" />
+        </StackPanel>
+    </StackPanel>
+</Window>

@@ -1,0 +1,51 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:GRAR.ViewModels"
+        x:Class="GRAR.Views.MessageDialog"
+        x:DataType="vm:MessageDialogViewModel"
+        Classes="dialog"
+        Title="{Binding Title}"
+        Width="460"
+        SizeToContent="Height"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False"
+        KeyDown="OnKeyDown">
+
+    <StackPanel Spacing="18" Margin="18,16">
+        <Grid ColumnDefinitions="Auto,*">
+            <Image Grid.Column="0"
+                   Source="{Binding IconImage}"
+                   Width="32"
+                   Height="32"
+                   VerticalAlignment="Top" />
+            <TextBlock Grid.Column="1"
+                       Text="{Binding Message}"
+                       TextWrapping="Wrap"
+                       VerticalAlignment="Center"
+                       Margin="14,0,0,0"
+                       LineHeight="18" />
+        </Grid>
+
+        <StackPanel Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Spacing="8">
+            <Button Content="OK"
+                    IsVisible="{Binding ShowOk}"
+                    IsDefault="True"
+                    Classes="primary"
+                    Click="OnOk" />
+            <Button Content="Yes"
+                    IsVisible="{Binding ShowYes}"
+                    IsDefault="True"
+                    Classes="primary"
+                    Click="OnYes" />
+            <Button Content="No"
+                    IsVisible="{Binding ShowNo}"
+                    Click="OnNo" />
+            <Button Content="Cancel"
+                    IsVisible="{Binding ShowCancel}"
+                    Click="OnCancel" />
+        </StackPanel>
+    </StackPanel>
+</Window>

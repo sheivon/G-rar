@@ -1,0 +1,41 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:GRAR.ViewModels"
+        x:Class="GRAR.Views.InputDialog"
+        x:DataType="vm:InputDialogViewModel"
+        Classes="dialog"
+        Title="{Binding Title}"
+        Width="430"
+        SizeToContent="Height"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False"
+        KeyDown="OnKeyDown">
+
+    <StackPanel Spacing="12" Margin="18,16">
+        <TextBlock Text="{Binding Label}" />
+
+        <TextBox x:Name="Input"
+                 Text="{Binding Value, Mode=TwoWay}"
+                 Watermark="Enter a name"
+                 KeyDown="OnInputKeyDown" />
+
+        <TextBlock Text="{Binding Error}"
+                   Foreground="#FFC0392B"
+                   TextWrapping="Wrap"
+                   IsVisible="{Binding HasError}" />
+
+        <StackPanel Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Spacing="8">
+            <Button Content="OK"
+                    IsDefault="True"
+                    Classes="primary"
+                    IsEnabled="{Binding ConfirmEnabled}"
+                    Click="OnOk" />
+            <Button Content="Cancel"
+                    IsCancel="True"
+                    Click="OnCancel" />
+        </StackPanel>
+    </StackPanel>
+</Window>

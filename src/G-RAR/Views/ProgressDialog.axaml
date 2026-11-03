@@ -1,0 +1,40 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:GRAR.ViewModels"
+        x:Class="GRAR.Views.ProgressDialog"
+        x:DataType="vm:ProgressDialogViewModel"
+        Classes="dialog"
+        Title="{Binding Title}"
+        Width="470"
+        SizeToContent="Height"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False"
+        Closing="OnClosing">
+
+    <StackPanel Spacing="12" Margin="18,16">
+        <StackPanel Spacing="3">
+            <TextBlock Text="{Binding Phase}" FontSize="14" FontWeight="SemiBold" />
+            <TextBlock Text="{Binding CurrentFile}"
+                       Classes="muted"
+                       TextTrimming="CharacterEllipsis"
+                       MaxLines="2"
+                       TextWrapping="Wrap" />
+        </StackPanel>
+
+        <ProgressBar Value="{Binding Percent}"
+                     Maximum="100"
+                     IsIndeterminate="{Binding Indeterminate}" />
+
+        <TextBlock Text="{Binding Detail}" Classes="muted" />
+
+        <StackPanel Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Spacing="8">
+            <Button Content="Cancel"
+                    IsVisible="{Binding ShowCancel}"
+                    Classes="primary"
+                    Command="{Binding CancelCommand}" />
+        </StackPanel>
+    </StackPanel>
+</Window>

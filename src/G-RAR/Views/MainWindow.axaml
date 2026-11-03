@@ -1,0 +1,336 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:GRAR.ViewModels"
+        xmlns:models="using:GRAR.Models"
+        x:Class="GRAR.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Title="{Binding WindowTitle}"
+        Width="1180"
+        Height="780"
+        MinWidth="780"
+        MinHeight="460"
+        WindowStartupLocation="CenterScreen"
+        FontSize="13">
+
+    <DockPanel>
+
+        <!-- ================================== menu ================================== -->
+
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="_File">
+                <MenuItem Header="Open archive…" Command="{Binding OpenArchiveCommand}" />
+                <MenuItem Header="Open containing folder" Command="{Binding OpenContainingFolderCommand}" />
+                <Separator />
+                <MenuItem Header="Close archive" Command="{Binding CloseArchiveCommand}" />
+                <Separator />
+                <MenuItem Header="Exit" Click="OnExitClick" />
+            </MenuItem>
+
+            <MenuItem Header="_Edit">
+                <MenuItem Header="Select all" Command="{Binding SelectAllCommand}" />
+                <MenuItem Header="Invert selection" Command="{Binding InvertSelectionCommand}" />
+                <Separator />
+                <MenuItem Header="Copy path" Command="{Binding CopyPathCommand}" />
+                <Separator />
+                <MenuItem Header="Delete" Command="{Binding DeleteCommand}" />
+                <MenuItem Header="Rename" Command="{Binding RenameCommand}" />
+            </MenuItem>
+
+            <MenuItem Header="_View">
+                <MenuItem Header="Refresh" Command="{Binding RefreshCommand}" />
+                <Separator />
+                <MenuItem Header="Folder tree" IsChecked="{Binding ShowTree, Mode=TwoWay}" />
+                <MenuItem Header="Status bar" IsChecked="{Binding ShowStatus, Mode=TwoWay}" />
+                <MenuItem Header="Show hidden files" IsChecked="{Binding ShowHidden, Mode=TwoWay}" />
+            </MenuItem>
+
+            <MenuItem Header="_Tools">
+                <MenuItem Header="Add to archive…" Command="{Binding AddCommand}" />
+                <MenuItem Header="Extract here…" Command="{Binding ExtractCommand}" />
+                <MenuItem Header="Test archive" Command="{Binding TestCommand}" />
+                <Separator />
+                <MenuItem Header="New folder…" Command="{Binding NewFolderCommand}" />
+                <Separator />
+                <MenuItem Header="Options…" Command="{Binding OptionsCommand}" />
+            </MenuItem>
+
+            <MenuItem Header="_Help">
+                <MenuItem Header="About G-RAR" Command="{Binding AboutCommand}" />
+            </MenuItem>
+        </Menu>
+
+        <!-- ================================= toolbar ================================= -->
+
+        <Border Classes="toolbar" DockPanel.Dock="Top">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Left" Orientation="Horizontal">
+                    <Button Classes="tool" Command="{Binding GoBackCommand}" ToolTip.Tip="Back">
+                        <Image Source="{StaticResource icon.back}" Width="16" Height="16" />
+                    </Button>
+                    <Button Classes="tool" Command="{Binding GoForwardCommand}" ToolTip.Tip="Forward">
+                        <Image Source="{StaticResource icon.forward}" Width="16" Height="16" />
+                    </Button>
+                    <Button Classes="tool" Command="{Binding GoUpCommand}" ToolTip.Tip="Up one level">
+                        <Image Source="{StaticResource icon.up}" Width="16" Height="16" />
+                    </Button>
+                    <Button Classes="tool" Command="{Binding RefreshCommand}" ToolTip.Tip="Refresh">
+                        <Image Source="{StaticResource icon.refresh}" Width="16" Height="16" />
+                    </Button>
+
+                    <Separator Classes="toolbar-sep" />
+
+                    <Button Classes="tool" Command="{Binding AddCommand}" ToolTip.Tip="Add files to an archive">
+                        <StackPanel Orientation="Horizontal" Spacing="5">
+                            <Image Source="{StaticResource icon.add}" Width="16" Height="16" />
+                            <TextBlock Text="Add" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                    <Button Classes="tool" Command="{Binding ExtractCommand}" ToolTip.Tip="Extract files from the archive">
+                        <StackPanel Orientation="Horizontal" Spacing="5">
+                            <Image Source="{StaticResource icon.extract}" Width="16" Height="16" />
+                            <TextBlock Text="Extract" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                    <Button Classes="tool" Command="{Binding TestCommand}" ToolTip.Tip="Test the archive">
+                        <StackPanel Orientation="Horizontal" Spacing="5">
+                            <Image Source="{StaticResource icon.test}" Width="16" Height="16" />
+                            <TextBlock Text="Test" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+
+                    <Separator Classes="toolbar-sep" />
+
+                    <Button Classes="tool" Command="{Binding DeleteCommand}" ToolTip.Tip="Delete">
+                        <Image Source="{StaticResource icon.delete}" Width="16" Height="16" />
+                    </Button>
+                    <Button Classes="tool" Command="{Binding RenameCommand}" ToolTip.Tip="Rename">
+                        <Image Source="{StaticResource icon.rename}" Width="16" Height="16" />
+                    </Button>
+                    <Button Classes="tool" Command="{Binding NewFolderCommand}" ToolTip.Tip="New folder">
+                        <Image Source="{StaticResource icon.newfolder}" Width="16" Height="16" />
+                    </Button>
+                </StackPanel>
+
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Classes="tool" Command="{Binding CloseArchiveCommand}" ToolTip.Tip="Close the archive">
+                        <Image Source="{StaticResource icon.close}" Width="16" Height="16" />
+                    </Button>
+                    <Button Classes="tool" Command="{Binding OptionsCommand}" ToolTip.Tip="Options">
+                        <Image Source="{StaticResource icon.settings}" Width="16" Height="16" />
+                    </Button>
+                    <Button Classes="tool" Command="{Binding AboutCommand}" ToolTip.Tip="About">
+                        <Image Source="{StaticResource icon.about}" Width="16" Height="16" />
+                    </Button>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <!-- ================================= address ================================= -->
+
+        <Border DockPanel.Dock="Top"
+                Background="#FFFAFBFD"
+                BorderBrush="{StaticResource Brush.ChromeBorder}"
+                BorderThickness="0,0,0,1"
+                Padding="8,5">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+                <TextBlock Grid.Column="0"
+                           Classes="muted"
+                           Text="Address"
+                           VerticalAlignment="Center"
+                           Margin="0,0,8,0" />
+                <TextBox Grid.Column="1"
+                         Classes="address"
+                         Text="{Binding AddressText, Mode=TwoWay}"
+                         KeyDown="OnAddressKeyDown" />
+                <Button Grid.Column="2"
+                        Classes="tool"
+                        Command="{Binding GoCommand}"
+                        Margin="6,0,0,0"
+                        ToolTip.Tip="Go">
+                    <Image Source="{StaticResource icon.forward}" Width="16" Height="16" />
+                </Button>
+            </Grid>
+        </Border>
+
+        <!-- ================================ status bar =============================== -->
+
+        <Border Classes="statusbar" DockPanel.Dock="Bottom" IsVisible="{Binding ShowStatus}">
+            <DockPanel>
+                <TextBlock Classes="status"
+                           DockPanel.Dock="Right"
+                           Text="{Binding ArchiveText}"
+                           Margin="16,0,0,0" />
+                <TextBlock Classes="status"
+                           DockPanel.Dock="Right"
+                           Text="{Binding SelectionText}"
+                           Margin="16,0,0,0" />
+                <TextBlock Classes="status" Text="{Binding StatusText}" />
+            </DockPanel>
+        </Border>
+
+        <!-- ================================== body =================================== -->
+
+        <Grid ColumnDefinitions="Auto,5,*">
+            <Border Grid.Column="0"
+                    Classes="panel"
+                    IsVisible="{Binding ShowTree}"
+                    Width="{Binding TreeWidth}"
+                    BorderThickness="0,0,1,0"
+                    CornerRadius="0">
+                <TreeView x:Name="Tree"
+                          ItemsSource="{Binding TreeRoots}"
+                          SelectionMode="Single"
+                          AutoScrollToSelectedItem="True"
+                          SelectionChanged="OnTreeSelectionChanged"
+                          ContainerPrepared="OnTreeContainerPrepared">
+                    <TreeView.ItemTemplate>
+                        <TreeDataTemplate x:DataType="models:FolderNode" ItemsSource="{Binding Children}">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <Image Source="{Binding Icon}" Width="16" Height="16" />
+                                <TextBlock Text="{Binding Name}" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </TreeDataTemplate>
+                    </TreeView.ItemTemplate>
+                </TreeView>
+            </Border>
+
+            <GridSplitter Grid.Column="1"
+                          Background="Transparent"
+                          ResizeDirection="Columns"
+                          HorizontalAlignment="Stretch"
+                          VerticalAlignment="Stretch" />
+
+            <Grid Grid.Column="2" RowDefinitions="*">
+                <Border Classes="panel" BorderThickness="0" CornerRadius="0">
+                    <DataGrid x:Name="FileGrid"
+                              ItemsSource="{Binding ItemsView}"
+                              Sorting="OnColumnSorting"
+                              SelectionChanged="OnGridSelectionChanged"
+                              DoubleTapped="OnGridDoubleTapped"
+                              ContextRequested="OnGridContextRequested">
+                        <DataGrid.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Open" Command="{Binding OpenCommand}" />
+                                <MenuItem Header="Extract here…" Command="{Binding ExtractCommand}" />
+                                <MenuItem Header="Add to archive…" Command="{Binding AddCommand}" />
+                                <MenuItem Header="Test archive" Command="{Binding TestCommand}" />
+                                <Separator />
+                                <MenuItem Header="Rename" Command="{Binding RenameCommand}" />
+                                <MenuItem Header="Delete" Command="{Binding DeleteCommand}" />
+                                <MenuItem Header="Copy path" Command="{Binding CopyPathCommand}" />
+                                <Separator />
+                                <MenuItem Header="Properties" Click="OnPropertiesClick" />
+                            </ContextMenu>
+                        </DataGrid.ContextMenu>
+
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Width="2*"
+                                                    MinWidth="160"
+                                                    SortMemberPath="Name"
+                                                    CanUserSort="True"
+                                                    IsReadOnly="True">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate x:DataType="models:FileItem">
+                                        <StackPanel Orientation="Horizontal"
+                                                    Spacing="6"
+                                                    Margin="4,0">
+                                            <Image Source="{Binding Icon}"
+                                                   Width="16"
+                                                   Height="16"
+                                                   VerticalAlignment="Center" />
+                                            <TextBlock Text="{Binding Name}"
+                                                       VerticalAlignment="Center"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       ToolTip.Tip="{Binding ToolTip}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTemplateColumn Width="90"
+                                                    SortMemberPath="Size"
+                                                    CanUserSort="True"
+                                                    IsReadOnly="True">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate x:DataType="models:FileItem">
+                                        <TextBlock Text="{Binding SizeText}"
+                                                   TextAlignment="Right"
+                                                   Margin="6,0,8,0"
+                                                   VerticalAlignment="Center" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTextColumn x:DataType="models:FileItem" Width="150"
+                                                MinWidth="90"
+                                                Header="Type"
+                                                SortMemberPath="Type"
+                                                CanUserSort="True"
+                                                IsReadOnly="True"
+                                                Binding="{Binding TypeName}" />
+
+                            <DataGridTextColumn x:DataType="models:FileItem" Width="132"
+                                                Header="Modified"
+                                                SortMemberPath="Modified"
+                                                CanUserSort="True"
+                                                IsReadOnly="True"
+                                                Binding="{Binding ModifiedText}" />
+
+                            <DataGridTemplateColumn Width="90"
+                                                    Header="Packed"
+                                                    SortMemberPath="Packed"
+                                                    CanUserSort="True"
+                                                    IsReadOnly="True">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate x:DataType="models:FileItem">
+                                        <TextBlock Text="{Binding PackedText}"
+                                                   TextAlignment="Right"
+                                                   Margin="6,0,8,0"
+                                                   VerticalAlignment="Center" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTemplateColumn Width="64"
+                                                    Header="Ratio"
+                                                    SortMemberPath="Ratio"
+                                                    CanUserSort="True"
+                                                    IsReadOnly="True">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate x:DataType="models:FileItem">
+                                        <TextBlock Text="{Binding RatioText}"
+                                                   TextAlignment="Right"
+                                                   Margin="6,0,8,0"
+                                                   VerticalAlignment="Center" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTextColumn x:DataType="models:FileItem" Width="88"
+                                                Header="CRC-32"
+                                                SortMemberPath="Crc"
+                                                CanUserSort="True"
+                                                IsReadOnly="True"
+                                                Binding="{Binding CrcText}" />
+
+                            <DataGridTextColumn x:DataType="models:FileItem" Width="86"
+                                                Header="Method"
+                                                SortMemberPath="Method"
+                                                CanUserSort="True"
+                                                IsReadOnly="True"
+                                                Binding="{Binding Method}" />
+
+                            <DataGridTextColumn x:DataType="models:FileItem" Width="76"
+                                                Header="Attr"
+                                                SortMemberPath="Attributes"
+                                                CanUserSort="True"
+                                                IsReadOnly="True"
+                                                Binding="{Binding Attributes}" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Border>
+            </Grid>
+        </Grid>
+
+    </DockPanel>
+</Window>

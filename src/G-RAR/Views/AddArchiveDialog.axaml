@@ -1,0 +1,114 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:GRAR.ViewModels"
+        x:Class="GRAR.Views.AddArchiveDialog"
+        x:DataType="vm:AddArchiveViewModel"
+        Classes="dialog"
+        Title="Add to archive"
+        Width="560"
+        SizeToContent="Height"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False"
+        KeyDown="OnKeyDown">
+
+    <ScrollViewer MaxHeight="660">
+        <StackPanel Spacing="10" Margin="18,16">
+
+            <TextBlock Classes="section" Text="ARCHIVE" Margin="0,0,0,0" />
+
+            <Grid ColumnDefinitions="*,Auto">
+                <TextBox Grid.Column="0"
+                         Classes="address"
+                         Text="{Binding ArchivePath, Mode=TwoWay}" />
+                <Button Grid.Column="1"
+                        Content="Browse…"
+                        Margin="8,0,0,0"
+                        Click="OnBrowse" />
+            </Grid>
+
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <TextBlock Text="Format:" VerticalAlignment="Center" />
+                <ComboBox Width="110"
+                          ItemsSource="{Binding FormatNamesList}"
+                          SelectedIndex="{Binding FormatIndex}" />
+                <TextBlock Text="Compression:"
+                           VerticalAlignment="Center"
+                           Margin="16,0,0,0" />
+                <Slider Width="130"
+                        Minimum="0"
+                        Maximum="9"
+                        TickFrequency="1"
+                        IsSnapToTickEnabled="True"
+                        Value="{Binding CompressionLevel}" />
+                <TextBlock Text="{Binding CompressionText}"
+                           Classes="muted"
+                           VerticalAlignment="Center" />
+            </StackPanel>
+
+            <TextBlock Text="{Binding FormatWarning}"
+                       Foreground="#FFB7791F"
+                       TextWrapping="Wrap"
+                       IsVisible="{Binding HasFormatWarning}" />
+
+            <TextBlock Classes="section" Text="PASSWORD" />
+
+            <CheckBox Content="Set a password for the files"
+                      IsChecked="{Binding RequirePassword}"
+                      IsVisible="{Binding PasswordEnabled}" />
+
+            <Grid ColumnDefinitions="*,*" IsVisible="{Binding ShowPasswordFields}">
+                <StackPanel Grid.Column="0" Spacing="4" Margin="0,0,5,0">
+                    <TextBlock Text="Password:" Classes="muted" />
+                    <TextBox Text="{Binding Password, Mode=TwoWay}"
+                             PasswordChar="●"
+                             Watermark="Password" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Spacing="4" Margin="5,0,0,0">
+                    <TextBlock Text="Repeat:" Classes="muted" />
+                    <TextBox Text="{Binding PasswordAgain, Mode=TwoWay}"
+                             PasswordChar="●"
+                             Watermark="Repeat password" />
+                </StackPanel>
+            </Grid>
+
+            <TextBlock Classes="section" Text="OPTIONS" />
+
+            <CheckBox Content="Include subfolders" IsChecked="{Binding IncludeSubfolders}" />
+            <CheckBox Content="Add empty folders" IsChecked="{Binding AddEmptyFolders}" />
+            <CheckBox Content="Delete files after archiving" IsChecked="{Binding DeleteAfterArchiving}" />
+            <CheckBox Content="Test the archive afterwards" IsChecked="{Binding TestAfterCreation}" />
+
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <TextBlock Text="Update mode:" VerticalAlignment="Center" />
+                <ComboBox MinWidth="230"
+                          ItemsSource="{Binding UpdateModeNamesList}"
+                          SelectedIndex="{Binding UpdateModeIndex}" />
+            </StackPanel>
+
+            <TextBlock Classes="section" Text="FILES TO ADD" />
+            <Border Classes="panel" Padding="8,6">
+                <TextBlock Text="{Binding SourcesSummary}" TextWrapping="Wrap" />
+            </Border>
+
+            <TextBlock Text="{Binding ValidationError}"
+                       Foreground="#FFC0392B"
+                       TextWrapping="Wrap"
+                       IsVisible="{Binding HasValidationError}" />
+
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Right"
+                        Spacing="8"
+                        Margin="0,8,0,0">
+                <Button Content="OK"
+                        IsDefault="True"
+                        Classes="primary"
+                        IsEnabled="{Binding ConfirmEnabled}"
+                        Click="OnOk" />
+                <Button Content="Cancel"
+                        IsCancel="True"
+                        Click="OnCancel" />
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</Window>
